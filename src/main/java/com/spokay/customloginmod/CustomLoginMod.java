@@ -1,6 +1,7 @@
 package com.spokay.customloginmod;
 
 import com.mojang.logging.LogUtils;
+import com.spokay.customloginmod.shared.PacketHandler;
 import com.spokay.customloginmod.config.Config;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.Registries;
@@ -24,6 +25,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -85,13 +87,13 @@ public class CustomLoginMod
 
         // Register the item to a creative tab
         modEventBus.addListener(this::addCreative);
-
         // Register our mod's ForgeConfigSpec so that Forge can create and load the config file for us
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event)
     {
+        PacketHandler.registerPackets();
         // Some common setup code
         LOGGER.info("HELLO FROM COMMON SETUP");
 
@@ -116,10 +118,11 @@ public class CustomLoginMod
     {
         // Do something when the server starts
         LOGGER.info("HELLO from server starting");
+//        PacketHandler.registerPackets();
     }
 
     // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
-    @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    @Mod.EventBusSubscriber(modid = MODID, value = Dist.CLIENT)
     public static class ClientModEvents
     {
         @SubscribeEvent
@@ -128,6 +131,17 @@ public class CustomLoginMod
             // Some client setup code
             LOGGER.info("HELLO FROM CLIENT SETUP");
             LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
+        }
+    }
+
+    @Mod.EventBusSubscriber(modid = MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.DEDICATED_SERVER)
+    public static class ServerModEvents
+    {
+        @SubscribeEvent
+        public static void onServerStart(FMLDedicatedServerSetupEvent event)
+        {
+            // Some server setup code
+            LOGGER.info("HELLO FROM SERVER start");
         }
     }
 }

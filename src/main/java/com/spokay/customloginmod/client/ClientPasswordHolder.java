@@ -14,12 +14,10 @@ import java.nio.file.StandardOpenOption;
 @OnlyIn(Dist.CLIENT)
 public class ClientPasswordHolder {
     private static ClientPasswordHolder INSTANCE;
-
-    public static final Path passwordFilePath = Paths.get(".", ".customloginstorage");
-
     private String password;
 
     private boolean passwordInitialized = false;
+    public static final Path passwordFilePath = Paths.get(".", ".customloginstorage");
 
     public static ClientPasswordHolder instance() {
         if (INSTANCE == null) {
@@ -41,12 +39,9 @@ public class ClientPasswordHolder {
     }
 
     public boolean isPasswordInitialized() {
-        System.out.println("Password initialized: " + passwordInitialized + " password: " + this.password);
-        System.out.println(Files.exists(passwordFilePath));
         return passwordInitialized && !this.password.isEmpty();
     }
     public void initializePassword(String newPassword) {
-        System.out.println(newPassword);
         if (!isPasswordInitialized()) {
             System.out.println("Password initialized and was not set before");
             this.password = PasswordEncoder.hashPassword(newPassword);

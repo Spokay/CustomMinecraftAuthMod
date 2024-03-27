@@ -5,11 +5,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.slf4j.Logger;
 
+@OnlyIn(Dist.CLIENT)
 @Mod.EventBusSubscriber(modid = "customloginmod", bus=Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
 public class LoginScreenEventSubscriber {
     private static final Logger LOGGER = LogUtils.getLogger();

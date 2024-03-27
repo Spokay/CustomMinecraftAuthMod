@@ -1,6 +1,5 @@
 package com.spokay.customloginmod.client;
 
-import com.spokay.customloginmod.LoginService;
 import com.spokay.customloginmod.utils.PasswordGenerator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -19,6 +18,7 @@ public class ChoosePasswordScreen extends Screen {
     int inputFieldWidth = 200;
     int inputFieldHeight = 20;
     int showHideButtonWidth = 50;
+    ExtendedButton randomPasswordButton;
     Screen nextScreen;
     EditBox editBox;
     PlainTextButton showHideButton;
@@ -67,15 +67,28 @@ public class ChoosePasswordScreen extends Screen {
             (button) -> {
                 if (!editBox.getValue().isEmpty()){
                     ClientPasswordHolder.instance().initializePassword(editBox.getValue());
-                }else{
-                    var randomPassword = PasswordGenerator.generateRandomPassword();
-                    ClientPasswordHolder.instance().initializePassword(randomPassword);
-
                 }
                 if (ClientPasswordHolder.instance().isPasswordInitialized()) {
                     Minecraft.getInstance().setScreen(nextScreen);
                 }
             }
+        );
+    }
+
+    ExtendedButton createRandomPasswordButton(){
+        int buttonHeight = 20;
+        int x = (this.width - inputFieldWidth) / 2;
+        int y = (this.height - buttonHeight + (inputFieldHeight / 2)) / 2 + 60;
+        return new ExtendedButton(
+                x,
+                y,
+                inputFieldWidth,
+                buttonHeight,
+                Component.literal("Generate Random Password"),
+                (button) -> {
+                    var randomPassword = PasswordGenerator.generateRandomPassword();
+                    editBox.setValue(randomPassword);
+                }
         );
     }
 
@@ -113,9 +126,11 @@ public class ChoosePasswordScreen extends Screen {
         this.editBox = this.getEditBox();
         this.showHideButton = this.createShowHideButton();
         this.submitButton = this.createSubmitButton();
+        this.randomPasswordButton = this.createRandomPasswordButton();
         this.addRenderableWidget(this.editBox);
         this.addRenderableWidget(this.showHideButton);
         this.addRenderableWidget(this.submitButton);
+        this.addRenderableWidget(this.randomPasswordButton);
     }
 
     @Override
@@ -139,7 +154,7 @@ public class ChoosePasswordScreen extends Screen {
         this.setInitialFocus(this.editBox);
         this.showHideButton.render(graphics, mouseX, mouseY, partialTick);
         this.submitButton.render(graphics, mouseX, mouseY, partialTick);
-//        this.hideButton.render(graphics, mouseX, mouseY, partialTick);
+        this.randomPasswordButton.render(graphics, mouseX, mouseY, partialTick);
     }
 
 
