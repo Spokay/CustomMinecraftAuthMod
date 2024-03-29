@@ -43,7 +43,6 @@ public class ClientPasswordHolder {
     }
     public void initializePassword(String newPassword) {
         if (!isPasswordInitialized()) {
-            System.out.println("Password initialized and was not set before");
             this.password = PasswordEncoder.hashPassword(newPassword);
             passwordInitialized = true;
             this.saveFileWithNewPassword(this.password);
@@ -72,5 +71,9 @@ public class ClientPasswordHolder {
 
     public String getPassword() {
         return password;
+    }
+
+    public void updateState(){
+        readPasswordStorage();
     }
 }

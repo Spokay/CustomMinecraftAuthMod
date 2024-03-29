@@ -47,6 +47,7 @@ public class ChoosePasswordScreen extends Screen {
             buttonHeight,
             Component.literal("Show/Hide"),
             (button) -> {
+                // Toggle the isPasswordHidden flag and set the focus to the edit box
                 isPasswordHidden = !isPasswordHidden;
                 this.setFocused(this.editBox);
             },
@@ -65,9 +66,11 @@ public class ChoosePasswordScreen extends Screen {
             buttonHeight,
             Component.literal("Submit"),
             (button) -> {
+                // If the user has entered a password, initialize the password
                 if (!editBox.getValue().isEmpty()){
                     ClientPasswordHolder.instance().initializePassword(editBox.getValue());
                 }
+                // If the password is initialized, move to the next screen
                 if (ClientPasswordHolder.instance().isPasswordInitialized()) {
                     Minecraft.getInstance().setScreen(nextScreen);
                 }
@@ -86,6 +89,7 @@ public class ChoosePasswordScreen extends Screen {
                 buttonHeight,
                 Component.literal("Generate Random Password"),
                 (button) -> {
+                    // Generate a random password and set it in the edit box
                     var randomPassword = PasswordGenerator.generateRandomPassword();
                     editBox.setValue(randomPassword);
                 }
@@ -104,6 +108,7 @@ public class ChoosePasswordScreen extends Screen {
                 boxHeight,
                 Component.literal("Enter a Password for you account")
         ) {
+            // Override the render method to hide the password according to the isPasswordHidden flag
             @Override
             public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
                 String originalValue = getValue();
@@ -123,6 +128,7 @@ public class ChoosePasswordScreen extends Screen {
     protected void init() {
         super.init();
 
+        // create the components and set them as renderable widgets
         this.editBox = this.getEditBox();
         this.showHideButton = this.createShowHideButton();
         this.submitButton = this.createSubmitButton();
@@ -136,6 +142,7 @@ public class ChoosePasswordScreen extends Screen {
     @Override
     public void tick() {
         super.tick();
+        // Tick the edit box to update the cursor
         this.editBox.tick();
     }
 

@@ -1,6 +1,5 @@
 package com.spokay.customloginmod.client;
 
-import com.spokay.customloginmod.CustomLoginMod;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
@@ -12,11 +11,14 @@ import net.minecraftforge.fml.common.Mod;
 public class ServerJoinEventSubscriber {
     @SubscribeEvent
     public static void onServerJoin(ClientPlayerNetworkEvent.LoggingIn event) {
-        CustomLoginMod.LOGGER.debug("Player logged in");
-        CustomLoginMod.LOGGER.info("Sending user info to server");
-
+        // when the player joins the server get his UUID
         String playerUUID = event.getPlayer().getUUID().toString();
+
+        // Check that the password holder is updated
+        ClientPasswordHolder.instance().updateState();
+        // get the stored password from the password holder
         String password = ClientPasswordHolder.instance().getPassword();
+        // send the user info to the server
         ClientMessageService.sendUserInfoToServer(playerUUID, password);
     }
 }

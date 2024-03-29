@@ -9,7 +9,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class ClientMessageService {
     public static void sendUserInfoToServer(String userId, String password) {
-        CustomLoginMod.LOGGER.info("Sending password to server");
+        // Send the user info to the server
         PacketHandler.INSTANCE.sendToServer(new JoinEventAuthenticationPacket(userId, password));
     }
 }

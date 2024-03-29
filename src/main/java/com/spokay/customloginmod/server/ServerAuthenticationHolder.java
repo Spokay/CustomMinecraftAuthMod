@@ -6,25 +6,23 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import oshi.util.tuples.Pair;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @OnlyIn(Dist.DEDICATED_SERVER)
 public class ServerAuthenticationHolder {
     private static ServerAuthenticationHolder INSTANCE;
 
-    private static final Path passwordFilePath = Paths.get(".", "/.authenticationstorage");
+    public static final Path passwordFilePath = Paths.get(".", "/.authenticationstorage");
 
-    private final List<Pair<String, String>> authenticationPairs = new ArrayList<>();
+    public final List<Pair<String, String>> authenticationPairs = new ArrayList<>();
 
-    private String fileContent = "";
-
-    public static ServerAuthenticationHolder instance() {
+    public synchronized static ServerAuthenticationHolder instance() {
         if (INSTANCE == null) {
             INSTANCE = new ServerAuthenticationHolder();
         }
@@ -33,16 +31,17 @@ public class ServerAuthenticationHolder {
 
     private ServerAuthenticationHolder() {
         if (Files.exists(passwordFilePath)) {
-            // Fill authentication pairs from file
-            CustomLoginMod.LOGGER.info("Filling Pairs");
             fillAuthenticationPairs();
         }else{
-            CustomLoginMod.LOGGER.info("File does not exist");
+            try {
+                Files.createFile(passwordFilePath);
+            } catch (IOException e) {
+                CustomLoginMod.LOGGER.error("Failed to create authentication storage file", e);
+            }
         }
     }
 
     public boolean isUserIdInStorage(String userId) {
-        CustomLoginMod.LOGGER.info("Checking if user id is in storage");
         return authenticationPairs.stream().anyMatch(pair -> pair.getA().equals(userId));
     }
 
@@ -50,26 +49,27 @@ public class ServerAuthenticationHolder {
         return authenticationPairs.stream().anyMatch(pair -> pair.getA().equals(userId) && pair.getB().equals(password));
     }
 
-    private void readAuthenticationStorage() {
+    private synchronized String readAuthenticationStorage() {
         try {
-            fileContent = Files.readString(passwordFilePath, StandardCharsets.UTF_8);
+            return Files.readString(passwordFilePath);
         } catch (IOException e) {
             CustomLoginMod.LOGGER.error("Failed to read authentication storage file", e);
         }
+        return null;
     }
 
     private void fillAuthenticationPairs() {
-        readAuthenticationStorage();
-        String[] lines = fileContent.split("\n");
-        CustomLoginMod.LOGGER.info("Lines: " + lines.length);
+        String[] lines = Objects.requireNonNull(readAuthenticationStorage()).split("\n");
         for (String line : lines) {
             String[] parts = line.split(";");
-            authenticationPairs.add(new Pair<>(parts[0], parts[1]));
+            if (parts.length == 2){
+                authenticationPairs.add(new Pair<>(parts[0], parts[1]));
+            }
         }
     }
 
     private void saveFileWithNewAuthentication(Pair<String, String> newAuthentication) {
-        String authLine = newAuthentication.getA() + ";" + newAuthentication.getB()+"\n";
+        String authLine = newAuthentication.getA() + ";" + newAuthentication.getB() + "\n";
         try {
             Files.writeString(passwordFilePath, authLine, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         } catch (IOException e) {
@@ -77,8 +77,9 @@ public class ServerAuthenticationHolder {
         }
     }
 
-    void registerUser(String userId, String password) {
+    public void registerUser(String userId, String password) {
         saveFileWithNewAuthentication(new Pair<>(userId, password));
+        authenticationPairs.add(new Pair<>(userId, password));
     }
 }
 
